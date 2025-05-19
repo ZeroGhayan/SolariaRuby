@@ -1,0 +1,47 @@
+<!-- status.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Operacional</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Status Operacional</h1>
+        <nav>
+            <a href="/">Painel</a>
+            <a href="/logs">Logs</a>
+            <a href="/settings">Configurações</a>
+            <a href="/graphs">Gráficos</a>
+            <a href="/status">Status</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Status Atual</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Componente</th>
+                    <th>Status</th>
+                    <th>Última Verificação</th>
+                </tr>
+            </thead>
+            <tbody id="status-table">
+                <!-- Dados dinâmicos do status serão preenchidos aqui -->
+                <tr>
+                    <td>API da Bitpreço</td>
+                    <td class="status-green">Ativo</td>
+                    <td>2025-01-15 14:00</td>
+                </tr>
+                <tr>
+                    <td>Banco de Dados</td>
+                    <td class="status-red">Offline</td>
+                    <td>2025-01-15 14:02</td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

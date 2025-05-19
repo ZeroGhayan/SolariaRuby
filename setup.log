@@ -1,0 +1,180 @@
+[2025-01-22 23:22:59] Iniciando configuração do sistema.
+[2025-01-22 23:22:59] Diretório de logs configurado em: logs
+[2025-01-22 23:22:59] Atualizando pacotes do sistema...
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+Lendo listas de pacotes...
+Construindo árvore de dependências...
+Lendo informação de estado...
+Calculando atualização...
+Os pacotes a seguir serão mantidos em suas versões atuais:
+  wiringpi
+Os pacotes a seguir serão atualizados:
+  apt apt-transport-https apt-utils base-files bash bind9-dnsutils bind9-host
+  bind9-libs bluez bsdextrautils bsdutils busybox-initramfs ca-certificates
+  containerd coreutils cpio curl distro-info-data dnsutils docker-compose-v2
+  docker.io e2fsprogs ethtool fdisk gir1.2-packagekitglib-1.0 git git-man
+  klibc-utils less libapparmor1 libapt-pkg6.0 libblkid1 libbluetooth3 libc-bin
+  libc-dev-bin libc6 libc6-dev libcom-err2 libcurl3-gnutls libcurl4 libexpat1
+  libexpat1-dev libext2fs2 libfdisk1 libglib2.0-0 libglib2.0-bin
+  libglib2.0-data libgnutls30 libgssapi-krb5-2 libgstreamer1.0-0 libk5crypto3
+  libklibc libkrb5-3 libkrb5support0 libldap-2.5-0 libmm-glib0 libmount1
+  libndp0 libnetplan0 libnghttp2-14 libpackagekit-glib2-18 libpcap0.8
+  libpython3-dev libpython3-stdlib libpython3.10 libpython3.10-dev
+  libpython3.10-minimal libpython3.10-stdlib libsmartcols1 libss2 libssl-dev
+  libssl3 libuuid1 linux-libc-dev locales logsave mount nano netplan.io
+  openssh-client openssh-server openssh-sftp-server openssl openvpn packagekit
+  python-apt-common python3 python3-apt python3-dev python3-minimal
+  python3-pkg-resources python3-setuptools python3-zipp python3.10
+  python3.10-dev python3.10-minimal rfkill rsync runc tzdata u-boot-tools
+  util-linux vim vim-common vim-runtime wget wpasupplicant xxd
+108 pacotes atualizados, 0 pacotes novos instalados, 0 a serem removidos e 1 não atualizados.
+É preciso baixar 131 MB de arquivos.
+Depois desta operação, 21,6 MB adicionais de espaço em disco serão usados.
+Obter:1 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libc6-dev arm64 2.35-0ubuntu3.8 [1.544 kB]
+Obter:2 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libc-dev-bin arm64 2.35-0ubuntu3.8 [19,6 kB]
+Obter:3 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 linux-libc-dev arm64 5.15.0-130.140 [1.290 kB]
+Obter:4 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libc6 arm64 2.35-0ubuntu3.8 [2.706 kB]
+Obter:5 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 base-files arm64 12ubuntu4.7 [61,8 kB]
+Obter:6 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 bash arm64 5.1-6ubuntu1.1 [762 kB]
+Obter:7 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 bsdutils arm64 1:2.37.2-4ubuntu3.4 [84,5 kB]
+Obter:8 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 coreutils arm64 8.32-4.1ubuntu1.2 [1.398 kB]
+Obter:9 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 util-linux arm64 2.37.2-4ubuntu3.4 [1.059 kB]
+Obter:10 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libc-bin arm64 2.35-0ubuntu3.8 [600 kB]
+Obter:11 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 libapt-pkg6.0 arm64 2.4.13 [872 kB]
+Obter:12 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 apt arm64 2.4.13 [1.329 kB]
+Obter:13 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 apt-utils arm64 2.4.13 [205 kB]
+Obter:14 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libgnutls30 arm64 3.7.3-4ubuntu1.5 [922 kB]
+Obter:15 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 logsave arm64 1.46.5-2ubuntu1.2 [9.918 B]
+Obter:16 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 libext2fs2 arm64 1.46.5-2ubuntu1.2 [211 kB]
+Obter:17 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 e2fsprogs arm64 1.46.5-2ubuntu1.2 [587 kB]
+Obter:18 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 mount arm64 2.37.2-4ubuntu3.4 [113 kB]
+Obter:19 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 python3.10-dev arm64 3.10.12-1~22.04.8 [508 kB]
+Obter:20 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 python3.10 arm64 3.10.12-1~22.04.8 [508 kB]
+Obter:21 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 libpython3-dev arm64 3.10.6-1~22.04.1 [7.064 B]
+Obter:22 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 python3-dev arm64 3.10.6-1~22.04.1 [26,0 kB]
+Obter:23 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 python3-minimal arm64 3.10.6-1~22.04.1 [24,3 kB]
+Obter:24 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 python3 arm64 3.10.6-1~22.04.1 [22,8 kB]
+Obter:25 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libexpat1-dev arm64 2.4.7-1ubuntu0.5 [130 kB]
+Obter:26 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libexpat1 arm64 2.4.7-1ubuntu0.5 [77,5 kB]
+Obter:27 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libpython3.10-dev arm64 3.10.12-1~22.04.8 [4.666 kB]
+Obter:28 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libpython3.10 arm64 3.10.12-1~22.04.8 [1.887 kB]
+Obter:29 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 python3.10-minimal arm64 3.10.12-1~22.04.8 [2.263 kB]
+Obter:30 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libssl-dev arm64 3.0.2-0ubuntu1.18 [2.299 kB]
+Obter:31 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libssl3 arm64 3.0.2-0ubuntu1.18 [1.769 kB]
+Obter:32 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libpython3.10-stdlib arm64 3.10.12-1~22.04.8 [1.846 kB]
+Obter:33 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libpython3.10-minimal arm64 3.10.12-1~22.04.8 [812 kB]
+Obter:34 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libuuid1 arm64 2.37.2-4ubuntu3.4 [23,8 kB]
+Obter:35 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 libpython3-stdlib arm64 3.10.6-1~22.04.1 [6.812 B]
+Obter:36 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 rsync arm64 3.2.7-0ubuntu0.22.04.4 [430 kB]
+Obter:37 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libk5crypto3 arm64 1.19.2-2ubuntu0.4 [91,6 kB]
+Obter:38 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libkrb5support0 arm64 1.19.2-2ubuntu0.4 [32,3 kB]
+Obter:39 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libkrb5-3 arm64 1.19.2-2ubuntu0.4 [357 kB]
+Obter:40 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libgssapi-krb5-2 arm64 1.19.2-2ubuntu0.4 [142 kB]
+Obter:41 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 libcom-err2 arm64 1.46.5-2ubuntu1.2 [9.108 B]
+Obter:42 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 libldap-2.5-0 arm64 2.5.18+dfsg-0ubuntu0.22.04.2 [180 kB]
+Obter:43 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libnghttp2-14 arm64 1.43.0-1ubuntu0.2 [76,0 kB]
+Obter:44 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libcurl3-gnutls arm64 7.81.0-1ubuntu1.20 [279 kB]
+Obter:45 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 git-man all 1:2.34.1-1ubuntu1.12 [955 kB]
+Obter:46 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 git arm64 1:2.34.1-1ubuntu1.12 [3.224 kB]
+Obter:47 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 openssh-sftp-server arm64 1:8.9p1-3ubuntu0.10 [36,8 kB]
+Obter:48 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 openssh-server arm64 1:8.9p1-3ubuntu0.10 [413 kB]
+Obter:49 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 openssh-client arm64 1:8.9p1-3ubuntu0.10 [863 kB]
+Obter:50 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libblkid1 arm64 2.37.2-4ubuntu3.4 [103 kB]
+Obter:51 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libmount1 arm64 2.37.2-4ubuntu3.4 [120 kB]
+Obter:52 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libsmartcols1 arm64 2.37.2-4ubuntu3.4 [49,5 kB]
+Obter:53 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 libss2 arm64 1.46.5-2ubuntu1.2 [11,9 kB]
+Obter:54 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 openssl arm64 3.0.2-0ubuntu1.18 [1.163 kB]
+Obter:55 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 ca-certificates all 20240203~22.04.1 [162 kB]
+Obter:56 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 distro-info-data all 0.52ubuntu0.8 [5.302 B]
+Obter:57 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 less arm64 590-1ubuntu0.22.04.3 [141 kB]
+Obter:58 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libapparmor1 arm64 3.0.4-2ubuntu2.4 [39,4 kB]
+Obter:59 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libglib2.0-data all 2.72.4-0ubuntu2.4 [4.582 B]
+Obter:60 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libglib2.0-bin arm64 2.72.4-0ubuntu2.4 [79,6 kB]
+Obter:61 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libglib2.0-0 arm64 2.72.4-0ubuntu2.4 [1.435 kB]
+Obter:62 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 netplan.io arm64 0.106.1-7ubuntu0.22.04.4 [106 kB]
+Obter:63 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libnetplan0 arm64 0.106.1-7ubuntu0.22.04.4 [104 kB]
+Obter:64 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 locales all 2.35-0ubuntu3.8 [4.245 kB]
+Obter:65 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 python-apt-common all 2.4.0ubuntu4 [14,6 kB]
+Obter:66 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 python3-apt arm64 2.4.0ubuntu4 [161 kB]
+Obter:67 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 python3-setuptools all 59.6.0-1.2ubuntu0.22.04.2 [340 kB]
+Obter:68 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 python3-pkg-resources all 59.6.0-1.2ubuntu0.22.04.2 [133 kB]
+Obter:69 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 tzdata all 2024a-0ubuntu0.22.04.1 [349 kB]
+Obter:70 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 vim arm64 2:8.2.3995-1ubuntu2.22 [1.665 kB]
+Obter:71 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 vim-runtime all 2:8.2.3995-1ubuntu2.22 [6.835 kB]
+Obter:72 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 xxd arm64 2:8.2.3995-1ubuntu2.22 [51,6 kB]
+Obter:73 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 vim-common all 2:8.2.3995-1ubuntu2.22 [81,5 kB]
+Obter:74 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 bind9-dnsutils arm64 1:9.18.30-0ubuntu0.22.04.1 [159 kB]
+Obter:75 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 bind9-host arm64 1:9.18.30-0ubuntu0.22.04.1 [52,1 kB]
+Obter:76 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 bind9-libs arm64 1:9.18.30-0ubuntu0.22.04.1 [1.213 kB]
+Obter:77 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 bsdextrautils arm64 2.37.2-4ubuntu3.4 [70,3 kB]
+Obter:78 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 cpio arm64 2.13+dfsg-7ubuntu0.1 [81,9 kB]
+Obter:79 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 libpcap0.8 arm64 1.10.1-4ubuntu1.22.04.1 [141 kB]
+Obter:80 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 nano arm64 6.2-1ubuntu0.1 [277 kB]
+Obter:81 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 wget arm64 1.21.2-2ubuntu1.1 [334 kB]
+Obter:82 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/universe arm64 apt-transport-https all 2.4.13 [1.510 B]
+Obter:83 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 bluez arm64 5.64-0ubuntu1.3 [1.078 kB]
+Obter:84 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 busybox-initramfs arm64 1:1.30.1-7ubuntu3.1 [176 kB]
+Obter:85 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 runc arm64 1.1.12-0ubuntu2~22.04.1 [7.816 kB]
+Obter:86 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 containerd arm64 1.7.12-0ubuntu2~22.04.1 [27,1 MB]
+Obter:87 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 curl arm64 7.81.0-1ubuntu1.20 [190 kB]
+Obter:88 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libcurl4 arm64 7.81.0-1ubuntu1.20 [284 kB]
+Obter:89 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/universe arm64 dnsutils all 1:9.18.30-0ubuntu0.22.04.1 [3.916 B]
+Obter:90 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/universe arm64 docker.io arm64 24.0.7-0ubuntu2~22.04.1 [21,2 MB]
+Obter:91 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/universe arm64 docker-compose-v2 arm64 2.24.6+ds1-0ubuntu1~22.04.1 [11,3 MB]
+Obter:92 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 ethtool arm64 1:5.16-1ubuntu0.1 [208 kB]
+Obter:93 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libfdisk1 arm64 2.37.2-4ubuntu3.4 [136 kB]
+Obter:94 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 fdisk arm64 2.37.2-4ubuntu3.4 [120 kB]
+Obter:95 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 libpackagekit-glib2-18 arm64 1.2.5-2ubuntu3 [116 kB]
+Obter:96 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 gir1.2-packagekitglib-1.0 arm64 1.2.5-2ubuntu3 [25,3 kB]
+Obter:97 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 klibc-utils arm64 2.0.10-4ubuntu0.1 [111 kB]
+Obter:98 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libklibc arm64 2.0.10-4ubuntu0.1 [50,9 kB]
+Obter:99 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libbluetooth3 arm64 5.64-0ubuntu1.3 [88,8 kB]
+Obter:100 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libgstreamer1.0-0 arm64 1.20.3-0ubuntu1.1 [930 kB]
+Obter:101 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 libmm-glib0 arm64 1.20.0-1~ubuntu22.04.4 [257 kB]
+Obter:102 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 libndp0 arm64 1.8-0ubuntu3.1 [12,1 kB]
+Obter:103 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 openvpn arm64 2.5.11-0ubuntu0.22.04.1 [607 kB]
+Obter:104 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 python3-zipp all 1.0.0-3ubuntu0.1 [6.288 B]
+Obter:105 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 rfkill arm64 2.37.2-4ubuntu3.4 [19,9 kB]
+Obter:106 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 u-boot-tools arm64 2022.01+dfsg-2ubuntu2.6 [201 kB]
+Obter:107 http://repo.huaweicloud.com/ubuntu-ports jammy-security/main arm64 wpasupplicant arm64 2:2.10-6ubuntu2.1 [1.452 kB]
+Obter:108 http://repo.huaweicloud.com/ubuntu-ports jammy-updates/main arm64 packagekit arm64 1.2.5-2ubuntu3 [425 kB]
+Preconfiguring packages ...
+Baixados 131 MB em 49s (2.664 kB/s)
+(Lendo banco de dados ... (Lendo banco de dados ... 5%(Lendo banco de dados ... 10%(Lendo banco de dados ... 15%(Lendo banco de dados ... 20%(Lendo banco de dados ... 25%(Lendo banco de dados ... 30%(Lendo banco de dados ... 35%(Lendo banco de dados ... 40%(Lendo banco de dados ... 45%(Lendo banco de dados ... 50%(Lendo banco de dados ... 55%(Lendo banco de dados ... 60%(Lendo banco de dados ... 65%(Lendo banco de dados ... 70%(Lendo banco de dados ... 75%(Lendo banco de dados ... 80%(Lendo banco de dados ... 85%(Lendo banco de dados ... 90%(Lendo banco de dados ... 95%(Lendo banco de dados ... 100%(Lendo banco de dados ... 41191 ficheiros e directórios actualmente instalados.)
+A preparar para desempacotar .../libc6-dev_2.35-0ubuntu3.8_arm64.deb ...
+A descompactar libc6-dev:arm64 (2.35-0ubuntu3.8) sobre (2.35-0ubuntu3.6) ...
+A preparar para desempacotar .../libc-dev-bin_2.35-0ubuntu3.8_arm64.deb ...
+A descompactar libc-dev-bin (2.35-0ubuntu3.8) sobre (2.35-0ubuntu3.6) ...
+A preparar para desempacotar .../linux-libc-dev_5.15.0-130.140_arm64.deb ...
+A descompactar linux-libc-dev:arm64 (5.15.0-130.140) sobre (5.15.0-100.110) ...
+A preparar para desempacotar .../libc6_2.35-0ubuntu3.8_arm64.deb ...
+A descompactar libc6:arm64 (2.35-0ubuntu3.8) sobre (2.35-0ubuntu3.6) ...
+Configurando libc6:arm64 (2.35-0ubuntu3.8) ...
+(Lendo banco de dados ... (Lendo banco de dados ... 5%(Lendo banco de dados ... 10%(Lendo banco de dados ... 15%(Lendo banco de dados ... 20%(Lendo banco de dados ... 25%(Lendo banco de dados ... 30%(Lendo banco de dados ... 35%(Lendo banco de dados ... 40%(Lendo banco de dados ... 45%(Lendo banco de dados ... 50%(Lendo banco de dados ... 55%(Lendo banco de dados ... 60%(Lendo banco de dados ... 65%(Lendo banco de dados ... 70%(Lendo banco de dados ... 75%(Lendo banco de dados ... 80%(Lendo banco de dados ... 85%(Lendo banco de dados ... 90%(Lendo banco de dados ... 95%(Lendo banco de dados ... 100%(Lendo banco de dados ... 41190 ficheiros e directórios actualmente instalados.)
+A preparar para desempacotar .../base-files_12ubuntu4.7_arm64.deb ...
+A descompactar base-files (12ubuntu4.7) sobre (12ubuntu4.6) ...
+Configurando base-files (12ubuntu4.7) ...
+
+Ficheiro de configuração '/etc/issue'
+ ==> Modificado (por si ou por um script) desde a instalação.
+ ==> O distribuidor do pacote lançou uma versão atualizada.
+   O que deseja fazer? As suas opções são:
+    Y ou I  : instalar a versão do pacote do maintainer
+    N ou O  : manter a versão actualmente instalada
+      D     : mostrar diferenças entre as versões
+      Z     : iniciar uma shell para examinar a situação
+ A ação padrão é manter sua versão atual.
+*** issue (Y/I/N/O/D/Z) [padrão=N] ? 
+
+Ficheiro de configuração '/etc/issue.net'
+ ==> Modificado (por si ou por um script) desde a instalação.
+ ==> O distribuidor do pacote lançou uma versão atualizada.
+   O que deseja fazer? As suas opções são:
+    Y ou I  : instalar a versão do pacote do maintainer
+    N ou O  : manter a versão actualmente instalada
+      D     : mostrar diferenças entre as versões
+      Z     : iniciar uma shell para examinar a situação
+ A ação padrão é manter sua versão atual.
+*** issue.net (Y/I/N/O/D/Z) [padrão=N] ? 

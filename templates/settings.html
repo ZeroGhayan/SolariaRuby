@@ -1,0 +1,38 @@
+<!-- settings.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Configurações</h1>
+        <nav>
+            <a href="/">Painel</a>
+            <a href="/logs">Logs</a>
+            <a href="/settings">Configurações</a>
+            <a href="/graphs">Gráficos</a>
+        </nav>
+    </header>
+    <main>
+        <h2>Preferências de Usuário</h2>
+        <form id="settings-form" method="POST">
+            <label for="background-image">Imagem de Fundo:</label>
+            <input type="file" id="background-image" name="background-image">
+
+            <label for="blur">Desfoque:</label>
+            <input type="range" id="blur" name="blur" min="0" max="10">
+
+            <label for="theme">Tema:</label>
+            <select id="theme" name="theme">
+                <option value="light">Claro</option>
+                <option value="dark">Escuro</option>
+            </select>
+            <button type="submit">Salvar</button>
+        </form>
+    </main>
+</body>
+</html>
