@@ -43,7 +43,7 @@ Projeto hospedado em um Orange Pi 5 e compatível com Raspberry Pi ou similares,
 
 ## Configuração
 
-1. Renomeie `.env.example` para `.env` e preencha com suas chaves:
+1. Renomeie `env.example` para `.env` e preencha com suas chaves:
    ```
    BITPRECO_API_KEY=...
    BITPRECO_SIGNATURE=...
@@ -65,7 +65,7 @@ Description=Solaria Ruby Trading Bot
 After=network.target
 
 [Service]
-WorkingDirectory=/caminho/para/solaria-ruby
+WorkingDirectory=/caminho/para/solariaRuby
 ExecStart=/usr/bin/python3 main.py
 Restart=always
 User=orangepi
@@ -76,15 +76,14 @@ WantedBy=multi-user.target
 
 ## Código de Indicação BityPreço
 Use meu código de indicação ao criar sua conta na BityPreço e ganhe benefícios:
-**Código: SEU_CODIGO_AQUI** (substitua pelo seu código real)
 
-Link direto: https://bitpreco.com/pt/br/register?ref=SEU_CODIGO
+Link direto: https://bity.com.br/108870
 
 ## Apoio ao Desenvolvedor
 Se o projeto te ajudou ou você obteve lucro com ele, considere apoiar o desenvolvimento:
 
-- **Pix**: `sua_chave_pix_aqui`
-- **Bitcoin**: `seu_endereco_btc_aqui`
+- **Pix**: `pjsdunham@tutanota.com`
+- **Bitcoin**: `bc1p36aamex4zqn76wyk53gdvmpz5rklc8hdnuam78xnjpk2c8c5s9ystnhj2q`
 
 Qualquer valor é bem-vindo e ajuda a manter e evoluir o bot!
 
