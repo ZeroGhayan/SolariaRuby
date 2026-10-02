@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*.pyc
+
+.env
+.env.*
+!env.example
+api.txt
+
+venv/
+.venv/
+
+logs/
+*.log
+setup.log
