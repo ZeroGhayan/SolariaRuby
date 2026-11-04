@@ -5,19 +5,19 @@ log = logging.getLogger(__name__)
 
 
 def size_order(decision, pair, price, base_free, quote_free, min_amount, min_cost, safety_margin):
-    """Valida a decisão contra saldo e mínimos. Retorna (side, amount) ou (None, motivo)."""
-    acao, qtd = decision["acao"], float(decision["quantidade"])
+    """Converte o percentual do comando em quantidade e valida saldo e mínimos. Retorna (side, amount) ou (None, motivo)."""
+    acao, pct = decision["acao"], int(decision["pct"])
     if acao == "manter":
         return None, "manter"
-    if price <= 0 or qtd <= 0:
-        return None, "preço ou quantidade inválidos"
+    if price <= 0 or not 0 < pct <= 100:
+        return None, "preço ou percentual inválidos"
+    usable = 1 - safety_margin
     if acao == "comprar":
-        max_qtd = quote_free * (1 - safety_margin) / price
+        amount = quote_free * usable * pct / 100 / price
         side = "buy"
     else:
-        max_qtd = base_free * (1 - safety_margin)
+        amount = base_free * usable * pct / 100
         side = "sell"
-    amount = min(qtd, max_qtd)
     if amount <= 0:
         return None, "saldo insuficiente"
     if amount < min_amount:
@@ -35,7 +35,7 @@ def run_pair(pair, exchange, analysis, telegram, tweets, safety_margin):
 
     exchange.cancel_open_orders(pair)
     decision = analysis.decide(pair, market, base_free, quote_free, tweets)
-    log.info("Decisão IA %s: %s %.8f (%s)", pair, decision["acao"], decision["quantidade"], decision["motivo"])
+    log.info("Decisão IA %s: %s (%s %d%%)", pair, decision["cmd"], decision["acao"], decision["pct"])
 
     min_amount, min_cost = exchange.limits(pair)
     side, amount = size_order(decision, pair, market["last"], base_free, quote_free,
@@ -57,6 +57,6 @@ def run_pair(pair, exchange, analysis, telegram, tweets, safety_margin):
         f"- Tipo: {decision['acao']}\n"
         f"- Quantidade: {amount:.8f} {base}\n"
         f"- Preço ref.: {market['last']:.2f} {quote}\n"
-        f"- Motivo: {decision['motivo']}"
+        f"- Comando: {decision['cmd']}"
     )
     return order

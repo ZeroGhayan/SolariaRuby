@@ -4,12 +4,12 @@ Bot leve em Python que roda em loop no Orange Pi 5 (ARM64) ou em qualquer Linux.
 
 1. lê o ticker e o saldo livre na **OKX** (via [ccxt](https://github.com/ccxt/ccxt));
 2. cancela ordens abertas do par;
-3. pede uma decisão ao **Grok (xAI)** usando o SDK `openai`, com saída JSON validada
-   `{"acao": "comprar|vender|manter", "quantidade": <moeda base>, "motivo": "..."}`;
+3. pede uma decisão ao **Grok (xAI)** (`grok-4.3`, raciocínio `none`) usando o SDK `openai`, que responde
+   só com um **comando rígido de 8 caracteres** (veja abaixo);
 4. valida saldo, margem de segurança e mínimos da OKX;
 5. executa uma ordem a mercado e avisa no Telegram **apenas se a ordem foi executada** (ou simulada).
 
-Erros da IA ou respostas inválidas resultam em **manter**. Erros técnicos vão para o canal de debug do Telegram.
+Erros da IA ou qualquer resposta fora do formato resultam em **manter**. Por padrão o ciclo roda **a cada 4 horas**. Erros técnicos vão para o canal de debug do Telegram.
 
 > ⚠️ `DRY_RUN=true` é o padrão: nenhuma ordem real é enviada. Só mude para `false` depois de acompanhar as simulações.
 
@@ -34,16 +34,38 @@ nano .env                 # preencha as chaves
 |---|---|
 | `OKX_API_KEY`, `OKX_API_SECRET`, `OKX_API_PASSPHRASE` | Credenciais da OKX |
 | `OKX_SANDBOX` | `true` para usar o ambiente demo da OKX |
-| `XAI_API_KEY`, `XAI_MODEL` | Chave e modelo do Grok (padrão `grok-4-1-fast-reasoning`) |
+| `XAI_API_KEY`, `XAI_MODEL` | Chave e modelo do Grok (padrão `grok-4.3`; o antigo `grok-4-1-fast-reasoning` foi aposentado em 15/05/2026) |
+| `XAI_REASONING_EFFORT` | `none` (padrão, mais barato), `low`, `medium`, `high`. Vazio = padrão da API (`low`) |
+| `XAI_MAX_TOKENS` | Limite de tokens da resposta (padrão 16) |
+| `XAI_PRICE_INPUT_PER_M`, `XAI_PRICE_CACHED_PER_M`, `XAI_PRICE_OUTPUT_PER_M` | Preços (US$/1M tokens) usados para estimar o custo no log |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID_MAIN`, `TELEGRAM_CHAT_ID_DEBUG` | Notificações (principal = ordens; debug = erros) |
 | `TWITTER_BEARER_TOKEN`, `TWITTER_USERNAME`, `TWITTER_HASHTAG` | Fonte opcional de tweets |
 | `TRADING_PAIRS` | Pares separados por vírgula, ex.: `BTC/BRL` ou `BTC/BRL,BTC/USDT` |
 | `DRY_RUN` | `true` (padrão) simula as ordens |
-| `INTERVAL_SECONDS` | Intervalo entre ciclos (padrão 600) |
+| `INTERVAL_SECONDS` | Intervalo entre ciclos (padrão 14400 = 4 h) |
+| `SCHEDULE_TIMES` | Opcional: horários fixos locais, ex. `01:00,04:00,07:00,10:00,13:00,16:00,19:00,22:00`. Tem prioridade sobre o intervalo |
 | `SAFETY_MARGIN` | Fração do saldo que nunca é usada (padrão 0.05) |
 | `LOG_LEVEL` | `INFO`, `DEBUG`... |
 
 Pares inexistentes no spot da OKX são ignorados na inicialização, com erro no log.
+
+## Comando de 8 caracteres
+Formato `APPPTTTT`, validado pela regex `^([CVM])(\d{3})([A-Z0-9_]{4})$`:
+
+| Parte | Significado |
+|---|---|
+| `A` | `C` comprar, `V` vender, `M` manter |
+| `PPP` | Percentual do saldo disponível (000–100). Na compra, % do saldo da moeda de cotação (ex.: BRL); na venda, % do saldo do ativo. `M` exige `000`, e `C`/`V` exigem pelo menos `001` |
+| `TTTT` | Ativo base do par, completado com `_` (ex.: `BTC_`, `ETH_`, `USDT`); tem que bater com o par |
+
+Exemplos: `C025BTC_` (comprar BTC com 25% do saldo em BRL), `V010BTC_` (vender 10% do BTC), `M000BTC_` (manter).
+A margem de segurança (`SAFETY_MARGIN`) e os mínimos da OKX são aplicados depois. Qualquer outra resposta vira `manter`.
+
+## Custo da IA
+Cada chamada envia um prompt curto (preço, saldo e até 3 tweets resumidos) e recebe ~4–8 tokens.
+O log mostra os tokens e o custo estimado de cada chamada, além do total acumulado. Com `grok-4.3`
+(US$ 1,25/1M de entrada, US$ 2,50/1M de saída), uma chamada sai em torno de US$ 0,0002–0,0004;
+são 6 chamadas por dia e por par no ciclo de 4 h.
 
 ## Rodar como serviço
 Veja `deploy/solaria-ruby.service` (systemd). Os logs ficam no `journalctl -u solaria-ruby`.
@@ -54,7 +76,7 @@ main.py                     loop principal
 trader.py                   lógica de um ciclo (dimensionamento e validação da ordem)
 configs/settings.py         leitura do .env
 services/exchange_service.py   OKX via ccxt
-services/analysis_service.py   Grok via SDK openai (JSON estruturado)
+services/analysis_service.py   Grok via SDK openai (comando de 8 caracteres)
 services/telegram_service.py   notificações
 services/twitter_service.py    tweets (opcional)
 tests/                      pytest com exchange e IA simulados
