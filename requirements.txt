@@ -1,3 +1,4 @@
-requests>=2.31.0
-python-dotenv>=1.0.0
-openai>=1.30.0
+ccxt==4.5.91
+openai==3.44.0
+python-dotenv==1.2.4
+requests==2.34.2

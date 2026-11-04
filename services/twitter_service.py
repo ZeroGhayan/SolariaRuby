@@ -1,205 +1,96 @@
-# services/twitter_service.py
-
-import requests
+"""Coleta opcional de tweets via API v2 do X (requer plano pago)."""
+import json
 import logging
 import os
 import time
-import json
-from datetime import datetime
-from configs.api_keys import TWITTER_BEARER_TOKEN
+
+import requests
+
+log = logging.getLogger(__name__)
+BASE_URL = "https://api.twitter.com/2"
+
 
 class TwitterService:
-    def __init__(self):
-        self.base_url = "https://api.twitter.com/2"
-        self.headers = {
-            "Authorization": f"Bearer {TWITTER_BEARER_TOKEN}"
-        }
+    def __init__(self, bearer_token, username, hashtag="#nostreidamos", log_path=os.path.join("logs", "twitter_logs.json")):
+        self.enabled = bool(bearer_token)
+        self.headers = {"Authorization": f"Bearer {bearer_token}"}
+        self.username = username
+        self.hashtag = hashtag.lower()
+        self.log_path = log_path
+        self._user_id = None
+        if not self.enabled:
+            log.info("Twitter desativado (TWITTER_BEARER_TOKEN ausente); usando apenas o histórico local.")
 
-        # Configuração de logs na pasta "logs"
-        os.makedirs("logs", exist_ok=True)
-        self.log_path = os.path.join("logs", "twitter_logs.json")
-        self.logger = logging.getLogger("TwitterService")
-        self.logger.setLevel(logging.INFO)
-        handler = logging.FileHandler(self.log_path, mode="a", encoding="utf-8")
-        formatter = logging.Formatter('%(asctime)s - %(message)s')
-        handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
+    def _get(self, path, params=None):
+        r = requests.get(f"{BASE_URL}{path}", headers=self.headers, params=params, timeout=20)
+        if r.status_code == 429:
+            log.warning("Limite da API do X atingido; tentando no próximo ciclo.")
+            return None
+        r.raise_for_status()
+        return r.json()
 
-    def _load_existing_logs(self):
-        """Carrega os logs existentes do arquivo."""
-        if os.path.exists(self.log_path):
-            with open(self.log_path, "r", encoding="utf-8") as file:
-                try:
-                    return json.load(file)
-                except json.JSONDecodeError:
-                    print("Erro ao decodificar o JSON existente no log. Ignorando conteúdo.")
-        return []
-
-    def _is_duplicate(self, latest_tweet):
-        """Verifica se o último tweet já está presente nos logs."""
-        existing_logs = self._load_existing_logs()
-        return any(log.get("id") == latest_tweet.get("id") for log in existing_logs)
-
-    def _append_to_log(self, new_tweet):
-        """Adiciona um novo tweet ao log, caso não seja duplicado."""
-        existing_logs = self._load_existing_logs()
-        existing_logs.append(new_tweet)
-        with open(self.log_path, "w", encoding="utf-8") as file:
-            json.dump(existing_logs, file, ensure_ascii=False, indent=4)
-
-    def _get_conversation_tweets(self, conversation_id):
-        """Recupera tweets relacionados a uma conversa específica."""
-        endpoint = f"{self.base_url}/tweets/search/recent"
-        params = {
-            "query": f"conversation_id:{conversation_id}",
-            "tweet.fields": "created_at,text",
-        }
-        try:
-            response = requests.get(endpoint, headers=self.headers, params=params)
-            response.raise_for_status()
-            data = response.json().get("data", [])
-            return [
-                {"created_at": tweet["created_at"], "text": tweet["text"], "id": tweet["id"]}
-                for tweet in data
-            ]
-        except requests.exceptions.RequestException as e:
-            print(f"Erro ao buscar tweets da conversa {conversation_id}: {e}")
+    def load_logs(self):
+        """Lê o histórico e achata listas aninhadas (formato antigo)."""
+        if not os.path.exists(self.log_path):
             return []
-
-    def get_user_id(self, username):
-        """
-        Recupera o ID de um usuário com base no nome de usuário.
-        :param username: Nome de usuário no Twitter (e.g., "allanraicher").
-        :return: ID do usuário ou None em caso de erro.
-        """
-        user_endpoint = f"{self.base_url}/users/by/username/{username}"
         try:
-            response = requests.get(user_endpoint, headers=self.headers)
-            response.raise_for_status()
-            return response.json().get("data", {}).get("id")
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Erro ao buscar ID do usuário {username}: {e}")
-            return None
+            with open(self.log_path, encoding="utf-8") as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            log.warning("Histórico de tweets ilegível; ignorando.")
+            return []
+        flat = []
+        stack = list(data) if isinstance(data, list) else []
+        while stack:
+            item = stack.pop(0)
+            if isinstance(item, list):
+                stack[0:0] = item
+            elif isinstance(item, dict) and "text" in item:
+                flat.append(item)
+        return flat
 
-    def get_user_tweets(self, username, count=10):
-        """
-        Recupera os tweets mais recentes de um usuário, filtrando pela hashtag relevante.
-        :param username: Nome de usuário no Twitter (e.g., "allanraicher").
-        :param count: Número máximo de tweets a recuperar.
-        :return: Lista de tweets relevantes ou None em caso de erro.
-        """
-        user_id = self.get_user_id(username)
-        if not user_id:
-            print(f"Usuário {username} não encontrado.")
-            return None
+    def _save(self, tweets):
+        os.makedirs(os.path.dirname(self.log_path) or ".", exist_ok=True)
+        tmp = self.log_path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(tweets, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, self.log_path)
 
-        # Endpoint para buscar tweets do usuário
-        tweets_endpoint = f"{self.base_url}/users/{user_id}/tweets"
-        params = {
-            "max_results": count,
-            "tweet.fields": "created_at,conversation_id,text",
-        }
-        retry_interval = 15  # Tempo inicial de espera em segundos
-        while True:
-            try:
-                response = requests.get(tweets_endpoint, headers=self.headers, params=params)
-                if response.status_code == 429:
-                    retry_interval = self.handle_too_many_requests("Limite de requisições atingido", retry_interval)
-                    continue  # Reenvia a requisição após o tempo de espera escalado
-
-                response.raise_for_status()
-                tweets = response.json().get("data", [])
-            
-                # Filtra tweets com a hashtag e mantém continuidade de logs
-                relevant_tweets = []
-                for tweet in tweets:
-                    if "#nostreidamos" in tweet["text"].lower():
-                        relevant_tweets.append({
-                            "created_at": tweet["created_at"],
-                            "text": tweet["text"],
-                            "id": tweet["id"],
-                            "conversation_id": tweet.get("conversation_id")
-                        })
-
-                '''
-                if response.status_code == 429:
-                    reset_time = int(response.headers.get("x-rate-limit-reset", time.time() + 60))
-                    sleep_time = max(reset_time - time.time(), 0) + 1
-                    print(f"Rate limit exceeded. Sleeping for {sleep_time} seconds.")
-                    time.sleep(sleep_time)
-                    return self.get_user_tweets(username, count)
-                response.raise_for_status()
-                tweets = response.json().get("data", [])
-                '''
-
-                # Verifica threads relacionadas usando get_thread_tweets
-                # Inclui tweets da thread apenas do autor original
-                if tweet.get("conversation_id"):
-                    thread_tweets = self.get_thread_tweets(tweet["conversation_id"], user_id)
-                    if thread_tweets:
-                        relevant_tweets.extend(thread_tweets)
-
-                # Elimina duplicatas e escreve no arquivo JSON
-                self._append_to_log(relevant_tweets)
-                return relevant_tweets
-
-            except requests.exceptions.RequestException as e:
-                print(f"Erro ao buscar tweets do usuário {username}: {e}")
-                return []
-
-    def handle_too_many_requests(self, error, retry_interval):
-        """
-        Trata o erro 429 escalando o tempo de espera.
-        """
-        print(f"Erro 429 (Muitas requisições): {error}")
-        print(f"Aguardando {retry_interval} segundos antes de tentar novamente...")
-        time.sleep(retry_interval)
-        return retry_interval * 2  # Escala o tempo de espera se o erro persistir
-
-
-    def get_thread_tweets(self, conversation_id, user_id):
-        """
-        Recupera todos os tweets em uma thread específica, filtrando apenas os do usuário especificado.
-        :param conversation_id: ID da conversa inicial.
-        :param user_id: ID do usuário principal (e.g., Allan Raicher).
-        :return: Lista de tweets relacionados ou None em caso de erro.
-        """
-        search_endpoint = f"{self.base_url}/tweets/search/recent"
-        params = {
-            "query": f"conversation_id:{conversation_id} from:{user_id}",
-            "tweet.fields": "created_at,text,author_id",
-        }
-
+    def get_user_tweets(self, count=10):
+        """Busca tweets novos com a hashtag e mescla ao histórico (sem duplicatas)."""
+        if not self.enabled:
+            return []
         try:
-            response = requests.get(search_endpoint, headers=self.headers, params=params)
-            response.raise_for_status()
-            tweets = response.json().get("data", [])
+            if not self._user_id:
+                data = self._get(f"/users/by/username/{self.username}")
+                if not data:
+                    return []
+                self._user_id = data["data"]["id"]
+            data = self._get(f"/users/{self._user_id}/tweets",
+                             {"max_results": max(5, min(count, 100)), "tweet.fields": "created_at,conversation_id"})
+        except (requests.RequestException, KeyError) as e:
+            log.error("Erro ao buscar tweets: %s", type(e).__name__)
+            return []
+        new = [
+            {"id": t["id"], "created_at": t.get("created_at"), "text": t["text"],
+             "conversation_id": t.get("conversation_id")}
+            for t in (data or {}).get("data", []) if self.hashtag in t.get("text", "").lower()
+        ]
+        existing = self.load_logs()
+        ids = {t.get("id") for t in existing}
+        added = [t for t in new if t["id"] not in ids]
+        if added:
+            self._save(existing + added)
+        return added
 
-            # Filtra tweets apenas do usuário especificado
-            filtered_tweets = [
-                {
-                    "created_at": tweet["created_at"],
-                    "text": tweet["text"]
-                } for tweet in tweets if tweet.get("author_id") == user_id
-            ]
-            return filtered_tweets
-        except requests.exceptions.RequestException as e:
-            print(f"Erro ao buscar tweets da thread {conversation_id}: {e}")
-            return None
+    def recent(self, n=5):
+        logs = self.load_logs()
+        logs.sort(key=lambda t: t.get("created_at") or "", reverse=True)
+        return logs[:n]
 
-    def get_logs(self):
-            """
-            Recupera os logs do arquivo JSON de registros do Twitter.
-            :return: Lista de tweets relevantes ou lista vazia se o arquivo não existir.
-            """
-            logs_path = os.path.join("logs", "twitter_logs.json")
-            if os.path.exists(logs_path):
-                with open(logs_path, "r") as logs_file:
-                    try:
-                        return json.load(logs_file)
-                    except json.JSONDecodeError:
-                        print("Erro ao ler o arquivo JSON de logs do Twitter. Retornando lista vazia.")
-                        return []
-            else:
-                print("Arquivo de logs do Twitter não encontrado. Criando arquivo vazio.")
-                return []
+    def fetch_and_get_recent(self, n=5, min_interval=1800):
+        now = time.time()
+        if self.enabled and now - getattr(self, "_last_fetch", 0) >= min_interval:
+            self._last_fetch = now
+            self.get_user_tweets()
+        return self.recent(n)

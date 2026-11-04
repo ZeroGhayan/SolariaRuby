@@ -1,95 +1,70 @@
-# Solaria Ruby — Bot de Day Trade Automatizado (BitPreço + Grok)
+# Solaria Ruby — Bot de trading spot (OKX + Grok)
 
-**Solaria Ruby** é um bot de day trade desenvolvido para operar na exchange brasileira **BityPreço**, utilizando a inteligência artificial **Grok** (xAI) para tomar decisões assertivas em 8 horários fixos diários (01:00, 04:00, 07:00, 10:00, 13:00, 16:00, 19:00,  22:00 -3).
+Bot leve em Python que roda em loop no Orange Pi 5 (ARM64) ou em qualquer Linux. A cada ciclo, para cada par configurado:
 
-O foco principal é maximizar a acumulação de BTC a longo prazo, com risco controlado, margem de segurança e execução eficiente. O bot já suporta múltiplos ativos com par em BRL (BTC, ETH, USDT, SOL, XRP, ADA, DOGE e dezenas de outros).
+1. lê o ticker e o saldo livre na **OKX** (via [ccxt](https://github.com/ccxt/ccxt));
+2. cancela ordens abertas do par;
+3. pede uma decisão ao **Grok (xAI)** usando o SDK `openai`, com saída JSON validada
+   `{"acao": "comprar|vender|manter", "quantidade": <moeda base>, "motivo": "..."}`;
+4. valida saldo, margem de segurança e mínimos da OKX;
+5. executa uma ordem a mercado e avisa no Telegram **apenas se a ordem foi executada** (ou simulada).
 
-Projeto hospedado em um Orange Pi 5 e compatível com Raspberry Pi ou similares, totalmente open-source para fins educacionais e de portfólio.
+Erros da IA ou respostas inválidas resultam em **manter**. Erros técnicos vão para o canal de debug do Telegram.
 
-## Tecnologias
+> ⚠️ `DRY_RUN=true` é o padrão: nenhuma ordem real é enviada. Só mude para `false` depois de acompanhar as simulações.
+
+## Requisitos
 - Python 3.10+
-- API da BityPreço (trading e ticker)
-- API do Grok (xAI) — modelo `grok-4-1-fast-reasoning`
-- Telegram Bot (notificações em canais separados: principal e debug)
-- Bibliotecas: `requests`, `openai`, `python-dotenv`
-
-## Funcionalidades
-- Coleta automática de saldo e preços
-- Decisão via Grok baseada em tweets e dados de mercado
-- Comando de 8 caracteres rígido para máxima eficiência e segurança
-- Suporte nativo a múltiplos ativos (todos com par -BRL)
-- Cancelamento automático de ordens pendentes
-- Proteções: margem de segurança (5%), mínimos de trade, fallback para "manter"
-- Canais Telegram separados (principal = financeiro, debug = técnico)
+- Conta na OKX com chave de API (permissão **Trade** apenas, **sem Withdraw**, restrita ao IP do Orange Pi)
+- Chave da API xAI
+- Bot do Telegram (opcional, mas recomendado)
+- Token da API do X/Twitter (opcional; exige plano pago). Sem ele, o bot usa só o histórico em `logs/twitter_logs.json`.
 
 ## Instalação
-
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/seu-usuario/solaria-ruby.git
-   cd solaria-ruby
-   ```
-
-2. Crie e ative um ambiente virtual (recomendado):
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. Instale as dependências:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-## Configuração
-
-1. Renomeie `env.example` para `.env` e preencha com suas chaves:
-   ```
-   BITPRECO_API_KEY=...
-   BITPRECO_SIGNATURE=...
-   TELEGRAM_BOT_TOKEN=...
-   TELEGRAM_CHAT_ID_MAIN=...
-   TELEGRAM_CHAT_ID_DEBUG=...
-   XAI_API_KEY=...
-   ```
-
-2. Execute em produção:
-   ```bash
-   python main.py
-   ```
-
-Para rodar automaticamente via systemd (recomendado em Raspberry Pi ou similares):
-```ini
-[Unit]
-Description=Solaria Ruby Trading Bot
-After=network.target
-
-[Service]
-WorkingDirectory=/caminho/para/solariaRuby
-ExecStart=/usr/bin/python3 main.py
-Restart=always
-User=orangepi
-
-[Install]
-WantedBy=multi-user.target
+```bash
+git clone https://github.com/ZeroGhayan/SolariaRuby.git
+cd SolariaRuby
+./scripts/setup.sh        # cria venv, instala requirements e gera .env
+nano .env                 # preencha as chaves
+./venv/bin/python main.py
 ```
 
-## Código de Indicação BityPreço
-Use meu código de indicação ao criar sua conta na BityPreço e ganhe benefícios:
+## Configuração (`.env`)
+| Variável | Descrição |
+|---|---|
+| `OKX_API_KEY`, `OKX_API_SECRET`, `OKX_API_PASSPHRASE` | Credenciais da OKX |
+| `OKX_SANDBOX` | `true` para usar o ambiente demo da OKX |
+| `XAI_API_KEY`, `XAI_MODEL` | Chave e modelo do Grok (padrão `grok-4-1-fast-reasoning`) |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID_MAIN`, `TELEGRAM_CHAT_ID_DEBUG` | Notificações (principal = ordens; debug = erros) |
+| `TWITTER_BEARER_TOKEN`, `TWITTER_USERNAME`, `TWITTER_HASHTAG` | Fonte opcional de tweets |
+| `TRADING_PAIRS` | Pares separados por vírgula, ex.: `BTC/BRL` ou `BTC/BRL,BTC/USDT` |
+| `DRY_RUN` | `true` (padrão) simula as ordens |
+| `INTERVAL_SECONDS` | Intervalo entre ciclos (padrão 600) |
+| `SAFETY_MARGIN` | Fração do saldo que nunca é usada (padrão 0.05) |
+| `LOG_LEVEL` | `INFO`, `DEBUG`... |
 
-Link direto: https://bity.com.br/108870
+Pares inexistentes no spot da OKX são ignorados na inicialização, com erro no log.
 
-## Apoio ao Desenvolvedor
-Se o projeto te ajudou ou você obteve lucro com ele, considere apoiar o desenvolvimento:
+## Rodar como serviço
+Veja `deploy/solaria-ruby.service` (systemd). Os logs ficam no `journalctl -u solaria-ruby`.
 
-- **Pix**: `pjsdunham@tutanota.com`
-- **Bitcoin**: `bc1p36aamex4zqn76wyk53gdvmpz5rklc8hdnuam78xnjpk2c8c5s9ystnhj2q`
+## Estrutura
+```
+main.py                     loop principal
+trader.py                   lógica de um ciclo (dimensionamento e validação da ordem)
+configs/settings.py         leitura do .env
+services/exchange_service.py   OKX via ccxt
+services/analysis_service.py   Grok via SDK openai (JSON estruturado)
+services/telegram_service.py   notificações
+services/twitter_service.py    tweets (opcional)
+tests/                      pytest com exchange e IA simulados
+```
 
-Qualquer valor é bem-vindo e ajuda a manter e evoluir o bot!
+## Testes
+```bash
+./venv/bin/pip install -r requirements-dev.txt
+./venv/bin/python -m pytest -q
+```
 
-## Aviso Legal
-Este é um projeto educacional. Trading envolve risco de perda de capital. Use por sua conta e risco. Não sou responsável por perdas financeiras.
-
-Desenvolvido por 00Zero (@ZeroGhayan no X)
-
-⭐ Se gostou, dê uma estrela no repositório!
+## Aviso
+Projeto educacional. Trading automatizado envolve risco de perda total. Use por sua conta e risco.

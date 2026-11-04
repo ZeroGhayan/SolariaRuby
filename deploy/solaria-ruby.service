@@ -1,0 +1,22 @@
+# Exemplo de serviço systemd. Ajuste User e caminhos e copie para /etc/systemd/system/
+#   sudo cp deploy/solaria-ruby.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now solaria-ruby
+#   journalctl -u solaria-ruby -f
+[Unit]
+Description=Solaria Ruby trading bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=orangepi
+WorkingDirectory=/home/orangepi/SolariaRuby
+ExecStart=/home/orangepi/SolariaRuby/venv/bin/python main.py
+Restart=on-failure
+RestartSec=30
+Environment=PYTHONUNBUFFERED=1
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
