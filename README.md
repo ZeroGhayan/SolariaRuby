@@ -22,9 +22,10 @@ Erros da IA ou qualquer resposta fora do formato resultam em **manter**. Por pad
 
 ## Instalação
 ```bash
-git clone https://github.com/ZeroGhayan/SolariaRuby.git
-cd SolariaRuby
-./scripts/setup.sh        # cria venv, instala requirements e gera .env
+cd ~/dgsManager
+git clone https://github.com/ZeroGhayan/SolariaRuby.git   # ou git pull, se já existir
+cd SolariaRuby                 # /home/orangepi/dgsManager/SolariaRuby
+./scripts/setup.sh        # cria ./venv, instala requirements e gera .env
 nano .env                 # preencha as chaves
 ./venv/bin/python main.py
 ```
@@ -67,8 +68,37 @@ O log mostra os tokens e o custo estimado de cada chamada, além do total acumul
 (US$ 1,25/1M de entrada, US$ 2,50/1M de saída), uma chamada sai em torno de US$ 0,0002–0,0004;
 são 6 chamadas por dia e por par no ciclo de 4 h.
 
-## Rodar como serviço
-Veja `deploy/solaria-ruby.service` (systemd). Os logs ficam no `journalctl -u solaria-ruby`.
+## Rodar como serviço (systemd)
+No Orange Pi **já existe um serviço funcionando**. Não crie outro: aponte o existente para o novo caminho.
+O arquivo `deploy/solaria-ruby.service` serve só de referência.
+
+1. Descubra o nome do serviço e veja a configuração atual:
+   ```bash
+   systemctl list-units --type=service | grep -i -E 'solaria|ruby|trade'
+   systemctl cat <nome>
+   ```
+2. Edite o serviço (o `--full` abre o arquivo original):
+   ```bash
+   sudo systemctl edit --full <nome>
+   ```
+   e deixe a seção `[Service]` assim:
+   ```ini
+   User=orangepi
+   WorkingDirectory=/home/orangepi/dgsManager/SolariaRuby
+   EnvironmentFile=/home/orangepi/dgsManager/SolariaRuby/.env
+   ExecStart=/home/orangepi/dgsManager/SolariaRuby/venv/bin/python main.py
+   Restart=on-failure
+   RestartSec=30
+   ```
+3. Recarregue e reinicie:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl restart <nome>
+   systemctl status <nome>
+   journalctl -u <nome> -f
+   ```
+
+O `.env` também é lido pelo próprio bot (python-dotenv), então o `EnvironmentFile` é uma garantia extra.
 
 ## Estrutura
 ```

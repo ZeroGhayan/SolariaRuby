@@ -1,7 +1,6 @@
-# Exemplo de serviço systemd. Ajuste User e caminhos e copie para /etc/systemd/system/
-#   sudo cp deploy/solaria-ruby.service /etc/systemd/system/
-#   sudo systemctl daemon-reload && sudo systemctl enable --now solaria-ruby
-#   journalctl -u solaria-ruby -f
+# Referência do serviço systemd para o Orange Pi 5 do Pedro.
+# Já existe um serviço funcionando no Orange Pi: NÃO crie um duplicado.
+# Use este arquivo só como referência para editar o serviço existente (veja o README).
 [Unit]
 Description=Solaria Ruby trading bot
 After=network-online.target
@@ -10,8 +9,9 @@ Wants=network-online.target
 [Service]
 Type=simple
 User=orangepi
-WorkingDirectory=/home/orangepi/SolariaRuby
-ExecStart=/home/orangepi/SolariaRuby/venv/bin/python main.py
+WorkingDirectory=/home/orangepi/dgsManager/SolariaRuby
+EnvironmentFile=/home/orangepi/dgsManager/SolariaRuby/.env
+ExecStart=/home/orangepi/dgsManager/SolariaRuby/venv/bin/python main.py
 Restart=on-failure
 RestartSec=30
 Environment=PYTHONUNBUFFERED=1

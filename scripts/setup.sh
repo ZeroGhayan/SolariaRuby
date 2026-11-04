@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# setup.sh - prepara o Solaria Ruby no Orange Pi 5 / Raspberry Pi (ARM64) ou qualquer Linux.
+# setup.sh - prepara o Solaria Ruby (no Orange Pi: /home/orangepi/dgsManager/SolariaRuby) no Orange Pi 5 / Raspberry Pi (ARM64) ou qualquer Linux.
 # Não faz "apt upgrade"; instala só o mínimo e cria um venv.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -23,4 +23,5 @@ if [ ! -f .env ]; then
     echo "Criei .env a partir do env.example — preencha as chaves (DRY_RUN=true por padrão)."
 fi
 mkdir -p logs
-echo "Pronto. Teste com: ./venv/bin/python main.py"
+echo "Pronto. Teste com: $(pwd)/venv/bin/python main.py"
+echo "Serviço: use o serviço systemd que já existe e aponte-o para $(pwd) (veja o README)."
