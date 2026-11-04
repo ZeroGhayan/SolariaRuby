@@ -1,80 +1,35 @@
-# services/telegram_service.py
+"""Notificações via Telegram Bot API."""
+import logging
 
 import requests
 
+log = logging.getLogger(__name__)
+
+
 class TelegramService:
-    def __init__(self, bot_token, chat_id):
+    def __init__(self, bot_token, chat_id_main, chat_id_debug=""):
         self.bot_token = bot_token
-        self.chat_id = chat_id
-        self.base_url = f"https://api.telegram.org/bot7577791459:AAHbop8KdPJuBDvoQ-AU6Esvhgw0coBvgnw"
+        self.chat_id_main = chat_id_main
+        self.chat_id_debug = chat_id_debug or chat_id_main
+        self.enabled = bool(bot_token and chat_id_main)
+        if not self.enabled:
+            log.warning("Telegram desativado (TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID_MAIN ausentes).")
+
+    def _send(self, chat_id, text):
+        if not self.enabled or not text:
+            return None
+        url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
+        try:
+            r = requests.post(url, json={"chat_id": chat_id, "text": text[:4000]}, timeout=15)
+            r.raise_for_status()
+            return r.json()
+        except requests.RequestException as e:
+            # não registra a URL (contém o token)
+            log.error("Falha ao enviar mensagem ao Telegram: %s", type(e).__name__)
+            return None
 
     def send_message(self, text):
-        """
-        Envia uma mensagem para o chat especificado.
-        :param text: Texto da mensagem a ser enviada.
-        :return: Resposta da API ou None em caso de erro.
-        """
-        if not text:
-            print("Erro: Mensagem vazia.")
-            return None
+        return self._send(self.chat_id_main, text)
 
-        endpoint = f"{self.base_url}/sendMessage"
-        payload = {"chat_id": self.chat_id, "text": text}
-        try:
-            response = requests.post(endpoint, json=payload)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"Erro ao enviar mensagem: {e}")
-            return None
-
-
-    def send_photo(self, photo_url, caption=None):
-        """
-        Envia uma foto para o chat especificado com uma legenda opcional.
-        :param photo_url: URL da foto a ser enviada.
-        :param caption: Legenda opcional para a foto.
-        :return: Resposta da API ou None em caso de erro.
-        """
-        endpoint = f"{self.base_url}/sendPhoto"
-        payload = {
-            "chat_id": self.chat_id,
-            "photo": photo_url,
-            "caption": caption
-        }
-        try:
-            response = requests.post(endpoint, json=payload)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"Erro ao enviar foto: {e}")
-            return None
-
-    def send_document(self, document_url, caption=None):
-        """
-        Envia um documento para o chat especificado com uma legenda opcional.
-        :param document_url: URL do documento a ser enviado.
-        :param caption: Legenda opcional para o documento.
-        :return: Resposta da API ou None em caso de erro.
-        """
-        endpoint = f"{self.base_url}/sendDocument"
-        payload = {
-            "chat_id": self.chat_id,
-            "document": document_url,
-            "caption": caption
-        }
-        try:
-            response = requests.post(endpoint, json=payload)
-            response.raise_for_status()
-            return response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"Erro ao enviar documento: {e}")
-            return None
-
-    def send_error_notification(self, error_message):
-        """
-        Envia uma mensagem de erro ao Telegram.
-        :param error_message: Mensagem detalhada sobre o erro.
-        """
-        text = f"⚠️ Alerta: {error_message}"
-        return self.send_message(text)
+    def send_debug(self, text):
+        return self._send(self.chat_id_debug, f"⚠️ {text}")
