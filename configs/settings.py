@@ -26,15 +26,15 @@ class Settings:
     xai_price_out: float = 2.50
     xai_base_url: str = "https://api.x.ai/v1"
     xai_cache_seconds: int = 600
-    xai_x_search: bool = False
-    xai_x_handles: list = field(default_factory=lambda: ["raicher", "DollynhoCoin"])
     xai_x_search_max_turns: int = 1
     telegram_bot_token: str = field(default="", repr=False)
     telegram_chat_id_main: str = ""
     telegram_chat_id_debug: str = ""
     twitter_bearer_token: str = field(default="", repr=False)
-    twitter_username: str = "allanraicher"
-    twitter_hashtag: str = "#nostreidamos"
+    x_source: str = "x_api"
+    x_handles: list = field(default_factory=lambda: ["raicher", "DollynhoCoin"])
+    x_query_filter: str = ""
+    x_max_posts_per_day: int = 20
     trading_pairs: list = field(default_factory=lambda: ["BTC/BRL"])
     dry_run: bool = True
     interval_seconds: int = 14400
@@ -76,15 +76,15 @@ def load_settings(env_file=None) -> Settings:
         xai_price_out=float(g("XAI_PRICE_OUTPUT_PER_M") or 2.50),
         xai_base_url=g("XAI_BASE_URL") or "https://api.x.ai/v1",
         xai_cache_seconds=int(g("XAI_CACHE_SECONDS") or 600),
-        xai_x_search=_bool(g("XAI_X_SEARCH"), False),
-        xai_x_handles=[h.strip().lstrip("@") for h in (g("XAI_X_HANDLES") or "raicher,DollynhoCoin").split(",") if h.strip()],
         xai_x_search_max_turns=int(g("XAI_X_SEARCH_MAX_TURNS") or 1),
         telegram_bot_token=g("TELEGRAM_BOT_TOKEN", ""),
         telegram_chat_id_main=g("TELEGRAM_CHAT_ID_MAIN", ""),
         telegram_chat_id_debug=g("TELEGRAM_CHAT_ID_DEBUG", ""),
         twitter_bearer_token=g("TWITTER_BEARER_TOKEN", ""),
-        twitter_username=g("TWITTER_USERNAME") or "allanraicher",
-        twitter_hashtag=(g("TWITTER_HASHTAG") or "#nostreidamos").lower(),
+        x_source=(g("X_SOURCE") or "x_api").strip().lower(),
+        x_handles=[h.strip().lstrip("@") for h in (g("X_HANDLES") or "raicher,DollynhoCoin").split(",") if h.strip()],
+        x_query_filter=g("X_QUERY_FILTER", ""),
+        x_max_posts_per_day=int(g("X_MAX_POSTS_PER_DAY") or 20),
         trading_pairs=pairs,
         dry_run=_bool(g("DRY_RUN"), True),
         interval_seconds=int(g("INTERVAL_SECONDS") or 14400),

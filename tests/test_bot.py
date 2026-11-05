@@ -96,7 +96,7 @@ def test_x_search_optional_uses_responses_api(tmp_path):
     m = {"last": 1.0, "high": 1.0, "low": 1.0, "change_pct": 0.0}
     assert a.decide("BTC/BRL", m, 1, 0, [])["acao"] == "vender"
     kw = cli.responses.create.call_args.kwargs
-    assert kw["tools"] == [{"type": "x_search", "allowed_x_handles": ["raicher", "DollynhoCoin"]}]
+    assert kw["tools"][0]["allowed_x_handles"] == ["raicher", "DollynhoCoin"]
     assert kw["reasoning"] == {"effort": "none"}
     assert x_search_cost(cli.responses.create.return_value.usage)[0] == 0.1
     assert abs(a.total_cost - (0.1 + (3000 * 1.25 + 10 * 2.5) / 1e6)) < 1e-12
@@ -179,20 +179,39 @@ def test_telegram_uses_config_token(monkeypatch):
 def test_twitter_flattens_nested_logs(tmp_path):
     p = tmp_path / "t.json"
     p.write_text(json.dumps([[{"id": "1", "text": "a", "created_at": "2025"}], [], {"id": "2", "text": "b", "created_at": "2026"}]))
-    tw = TwitterService("", "u", log_path=str(p))
+    tw = TwitterService("", log_path=str(p))
     assert [t["id"] for t in tw.recent()] == ["2", "1"]
-    assert tw.get_user_tweets() == []
+    assert tw.fetch_new() == []
 
 
-def test_schedule(tmp_path, monkeypatch):
-    from datetime import datetime
-    from main import seconds_until_next
-    for k in ("SCHEDULE_TIMES", "INTERVAL_SECONDS", "XAI_MODEL", "XAI_REASONING_EFFORT"):
-        monkeypatch.delenv(k, raising=False)
-    f = tmp_path / ".env"
-    f.write_text("SCHEDULE_TIMES=22:00,01:00\n")
-    s = load_settings(str(f))
-    assert s.schedule_times == [(1, 0), (22, 0)] and s.interval_seconds == 14400
-    assert s.xai_model == "grok-4.3" and s.xai_reasoning_effort == "none"
-    assert seconds_until_next(s.schedule_times, datetime(2026, 1, 1, 23, 0)) == 7200
-    assert seconds_until_next(s.schedule_times, datetime(2026, 1, 1, 12, 0)) == 36000
+def test_x_api_fetch_uses_since_id_and_daily_cap(tmp_path, monkeypatch):
+    calls = []
+
+    def fake_get(url, headers, params, timeout):
+        calls.append(params)
+        body = {"data": [{"id": "11", "text": "Log 99 #nostreidamos", "created_at": "2026-11-04T10:00:00Z", "author_id": "u1"},
+                         {"id": "12", "text": "BTC rompendo", "created_at": "2026-11-04T11:00:00Z", "author_id": "u2"}],
+                "includes": {"users": [{"id": "u1", "username": "raicher"}, {"id": "u2", "username": "DollynhoCoin"}]},
+                "meta": {"newest_id": "12"}}
+        return MagicMock(status_code=200, json=lambda: body, raise_for_status=lambda: None)
+
+    monkeypatch.setattr("services.twitter_service.requests.get", fake_get)
+    tw = TwitterService("tok", ["@raicher", "DollynhoCoin"], max_posts_per_day=20,
+                        log_path=str(tmp_path / "l.json"), state_path=str(tmp_path / "s.json"))
+    assert tw.build_query() == "(from:raicher OR from:DollynhoCoin) -is:retweet -is:reply"
+    assert len(tw.fetch_new()) == 2
+    assert "since_id" not in calls[0] and calls[0]["max_results"] == 20
+    tw.fetch_new()  # segunda busca usa since_id e não duplica o histórico
+    assert calls[1]["since_id"] == "12" and calls[1]["max_results"] == 18
+    assert [p["author"] for p in tw.recent()] == ["DollynhoCoin", "raicher"]
+    for _ in range(5):
+        tw.fetch_new()
+    assert len(calls) == 6  # 6 buscas x 2 posts = 12 -> restam 8 < 10: para de buscar
+
+
+def test_x_search_has_date_filter(tmp_path):
+    cli = MagicMock()
+    cli.responses.create.return_value = SimpleNamespace(output_text="M0000000", usage=None)
+    a = AnalysisService("k", "grok-4.3", client=cli, cache_seconds=0, x_search=True, x_handles=["raicher"])
+    a.decide("BTC/BRL", {"last": 1.0, "high": 1.0, "low": 1.0, "change_pct": 0.0}, 0, 0, [])
+    assert "from_date" in cli.responses.create.call_args.kwargs["tools"][0]

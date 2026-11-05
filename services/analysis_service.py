@@ -17,6 +17,7 @@ import logging
 import os
 import re
 import time
+from datetime import datetime, timedelta, timezone
 
 from openai import OpenAI
 
@@ -206,6 +207,8 @@ class AnalysisService:
         tool = {"type": "x_search"}
         if self.x_handles:
             tool["allowed_x_handles"] = self.x_handles[:20]
+        # só posts desde ontem (UTC) para reduzir o número de posts lidos (cobrados)
+        tool["from_date"] = (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d")
         kwargs = {"reasoning": {"effort": self.reasoning_effort}} if self.reasoning_effort else {}
         resp = self.client.responses.create(
             model=self.model,

@@ -34,6 +34,9 @@ def main():
     if not s.dry_run and not (s.okx_api_key and s.okx_api_secret and s.okx_api_passphrase):
         log.critical("DRY_RUN=false exige OKX_API_KEY, OKX_API_SECRET e OKX_API_PASSPHRASE.")
         return 1
+    if s.x_source not in ("x_api", "xai", "off"):
+        log.critical("X_SOURCE deve ser x_api, xai ou off (atual: %s).", s.x_source)
+        return 1
     if not s.xai_api_key:
         log.critical("XAI_API_KEY ausente.")
         return 1
@@ -43,10 +46,11 @@ def main():
     analysis = AnalysisService(s.xai_api_key, s.xai_model, s.xai_base_url,
                                reasoning_effort=s.xai_reasoning_effort, max_tokens=s.xai_max_tokens,
                                prices=(s.xai_price_in, s.xai_price_cached, s.xai_price_out),
-                               cache_seconds=s.xai_cache_seconds, x_search=s.xai_x_search,
-                               x_handles=s.xai_x_handles, x_search_max_turns=s.xai_x_search_max_turns)
+                               cache_seconds=s.xai_cache_seconds, x_search=(s.x_source == "xai"),
+                               x_handles=s.x_handles, x_search_max_turns=s.xai_x_search_max_turns)
     telegram = TelegramService(s.telegram_bot_token, s.telegram_chat_id_main, s.telegram_chat_id_debug)
-    twitter = TwitterService(s.twitter_bearer_token, s.twitter_username, s.twitter_hashtag)
+    twitter = TwitterService(s.twitter_bearer_token if s.x_source == "x_api" else "", s.x_handles,
+                             s.x_query_filter, s.x_max_posts_per_day)
 
     pairs = exchange.validate_pairs(s.trading_pairs)
     if not pairs:
@@ -54,8 +58,8 @@ def main():
         return 1
     agenda = (",".join(f"{h:02d}:{m:02d}" for h, m in s.schedule_times)
               if s.schedule_times else f"a cada {s.interval_seconds}s")
-    log.info("Iniciando. Pares=%s DRY_RUN=%s modelo=%s raciocínio=%s agenda=%s X Search=%s",
-             pairs, s.dry_run, s.xai_model, s.xai_reasoning_effort, agenda, s.xai_x_search)
+    log.info("Iniciando. Pares=%s DRY_RUN=%s modelo=%s raciocínio=%s agenda=%s fonte X=%s",
+             pairs, s.dry_run, s.xai_model, s.xai_reasoning_effort, agenda, s.x_source)
     if s.schedule_times:
         time.sleep(seconds_until_next(s.schedule_times))
 

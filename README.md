@@ -18,7 +18,7 @@ Erros da IA ou qualquer resposta fora do formato resultam em **manter**. Por pad
 - Conta na OKX com chave de API (permissão **Trade** apenas, **sem Withdraw**, restrita ao IP do Orange Pi)
 - Chave da API xAI
 - Bot do Telegram (opcional, mas recomendado)
-- Token da API do X/Twitter (opcional; exige plano pago). Sem ele, o bot usa só o histórico em `logs/twitter_logs.json`.
+- Bearer token da API do X (pay-per-use, com créditos comprados em console.x.com) para ler os posts de @raicher e @DollynhoCoin. Sem ele, o bot usa só o histórico em `logs/twitter_logs.json`.
 
 ## Instalação
 ```bash
@@ -40,9 +40,13 @@ nano .env                 # preencha as chaves
 | `XAI_MAX_TOKENS` | Limite de tokens da resposta (padrão 16) |
 | `XAI_PRICE_INPUT_PER_M`, `XAI_PRICE_CACHED_PER_M`, `XAI_PRICE_OUTPUT_PER_M` | Preços (US$/1M tokens) usados para estimar o custo no log |
 | `XAI_CACHE_SECONDS` | Reaproveita a resposta de uma pergunta idêntica (padrão 600; 0 desliga) |
-| `XAI_X_SEARCH`, `XAI_X_HANDLES`, `XAI_X_SEARCH_MAX_TURNS` | Busca ao vivo no X (padrão `false`; veja os custos abaixo) |
+| `XAI_X_SEARCH_MAX_TURNS` | Só para `X_SOURCE=xai`: rodadas máximas de busca por chamada (padrão 1) |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID_MAIN`, `TELEGRAM_CHAT_ID_DEBUG` | Notificações (principal = ordens; debug = erros) |
-| `TWITTER_BEARER_TOKEN`, `TWITTER_USERNAME`, `TWITTER_HASHTAG` | Fonte opcional de tweets |
+| `X_SOURCE` | `x_api` (padrão), `xai` ou `off`; veja "Posts do X" |
+| `TWITTER_BEARER_TOKEN` | Bearer token da API do X (para `x_api`) |
+| `X_HANDLES` | Contas lidas (padrão `raicher,DollynhoCoin`) |
+| `X_QUERY_FILTER` | Filtro extra opcional na busca, ex.: `#nostreidamos` (menos posts = mais barato) |
+| `X_MAX_POSTS_PER_DAY` | Teto de posts lidos por dia UTC (padrão 20 = no máx. US$ 0,10/dia) |
 | `TRADING_PAIRS` | Pares separados por vírgula, ex.: `BTC/BRL` ou `BTC/BRL,BTC/USDT` |
 | `DRY_RUN` | `true` (padrão) simula as ordens |
 | `INTERVAL_SECONDS` | Intervalo entre ciclos (padrão 14400 = 4 h) |
@@ -81,14 +85,23 @@ Com `grok-4.3` (US$ 1,25/1M de entrada, US$ 2,50/1M de saída), uma chamada sai 
 são 6 chamadas por dia e por par no ciclo de 4 h. Se a pergunta for idêntica em menos de `XAI_CACHE_SECONDS`
 (padrão 600 s), a resposta anterior é reaproveitada (cache em `data/cache/`).
 
-### Busca ao vivo no X (opcional, desligada)
-O prompt original pedia para "analisar em tempo real" os posts de @raicher e @DollynhoCoin, mas uma chamada
-comum de chat não navega. A xAI oferece a ferramenta `x_search`, que só existe na **Responses API**.
-Com `XAI_X_SEARCH=true`, o bot usa essa API, limitada às contas de `XAI_X_HANDLES` e a `XAI_X_SEARCH_MAX_TURNS` rodadas.
-Custo (docs.x.ai): **US$ 5 por 1.000 posts lidos** (US$ 10 por 1.000 perfis), mais os tokens dos posts lidos.
-Uma busca com cerca de 20 posts custa uns US$ 0,10 mais US$ 0,005 de tokens, ou seja, perto de US$ 0,60/dia no ciclo de 4 h,
-o que acabaria com um crédito de US$ 4 em cerca de 1 semana. Os posts coletados pela API do X (`TWITTER_BEARER_TOKEN`)
-continuam sendo enviados no prompt normalmente.
+## Posts do X (@raicher e @DollynhoCoin)
+O código antigo pedia ao Grok para "analisar em tempo real" os posts no X, mas usava `chat.completions` sem
+ferramentas. **Assim o modelo não acessa o X.** A documentação da xAI diz que, sem ferramentas de busca, o Grok não tem dados
+em tempo real. A antiga Live Search (`search_parameters`) foi descontinuada e hoje retorna `410 Gone`, e a busca agora só
+existe como ferramenta `x_search` na Responses API. Ou seja, as decisões antigas eram tomadas **sem** os posts.
+
+Agora há três fontes (`X_SOURCE`):
+
+| Opção | Como funciona | Custo |
+|---|---|---|
+| `x_api` (**padrão**) | Uma busca `(from:raicher OR from:DollynhoCoin) -is:retweet -is:reply` na API oficial do X (`/2/tweets/search/recent`), no máximo a cada 30 min, com `since_id`: só posts **novos** vêm e são cobrados. Os textos (até 3 mais recentes) entram no prompt | US$ 0,005 por post lido, com deduplicação no mesmo dia UTC. Teto `X_MAX_POSTS_PER_DAY=20`, ou seja, **no máx. US$ 0,10/dia (≈ US$ 3/mês)**. Se as contas postarem ~6 posts/dia, ≈ US$ 0,03/dia |
+| `xai` | Ferramenta `x_search` do Grok (Responses API), limitada às contas e a posts desde ontem, com `max_turns=1` | US$ 5 por 1.000 posts lidos **a cada chamada** (sem deduplicação entre chamadas), mais os tokens desses posts. Com ~20 posts por chamada: ≈ US$ 0,10 + tokens, ou **≈ US$ 0,60–0,70/dia** em 6 chamadas |
+| `off` | Só o histórico local | US$ 0 |
+
+Por isso o padrão é `x_api`: ele paga cada post uma vez só, enquanto a `x_search` relê os mesmos posts a cada ciclo.
+Atenção: os créditos da API do X são **separados** dos créditos da xAI e se compram em console.x.com.
+Fontes: docs.x.com (pricing pay-per-use), docs.x.ai/developers/tools/x-search, docs.x.ai/developers/pricing.
 
 ## Rodar como serviço (systemd)
 No Orange Pi **já existe um serviço funcionando**. Não crie outro: aponte o existente para o novo caminho.
