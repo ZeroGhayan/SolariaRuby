@@ -2,3 +2,8 @@ ccxt==4.5.91
 openai==3.44.0
 python-dotenv==1.2.4
 requests==2.34.2
+# análise técnica local e gráficos (wheels aarch64 prontos para o Orange Pi 5; sem TA-Lib)
+# faixas em vez de versões fixas para o pip escolher a versão compatível com o Python do Orange Pi
+numpy>=1.26,<3
+pandas>=2.1,<4
+matplotlib>=3.8,<4

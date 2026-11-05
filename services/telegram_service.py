@@ -28,6 +28,20 @@ class TelegramService:
             log.error("Falha ao enviar mensagem ao Telegram: %s", type(e).__name__)
             return None
 
+    def send_photo(self, png_bytes, caption=""):
+        """Envia um PNG (gráfico) ao chat principal via sendPhoto."""
+        if not self.enabled or not png_bytes:
+            return None
+        url = f"https://api.telegram.org/bot{self.bot_token}/sendPhoto"
+        try:
+            r = requests.post(url, data={"chat_id": self.chat_id_main, "caption": caption[:1024]},
+                              files={"photo": ("solaria.png", png_bytes, "image/png")}, timeout=30)
+            r.raise_for_status()
+            return r.json()
+        except requests.RequestException as e:
+            log.error("Falha ao enviar gráfico ao Telegram: %s", type(e).__name__)
+            return None
+
     def send_message(self, text):
         return self._send(self.chat_id_main, text)
 
