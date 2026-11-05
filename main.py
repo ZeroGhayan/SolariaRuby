@@ -42,7 +42,9 @@ def main():
                                sandbox=s.okx_sandbox, dry_run=s.dry_run)
     analysis = AnalysisService(s.xai_api_key, s.xai_model, s.xai_base_url,
                                reasoning_effort=s.xai_reasoning_effort, max_tokens=s.xai_max_tokens,
-                               prices=(s.xai_price_in, s.xai_price_cached, s.xai_price_out))
+                               prices=(s.xai_price_in, s.xai_price_cached, s.xai_price_out),
+                               cache_seconds=s.xai_cache_seconds, x_search=s.xai_x_search,
+                               x_handles=s.xai_x_handles, x_search_max_turns=s.xai_x_search_max_turns)
     telegram = TelegramService(s.telegram_bot_token, s.telegram_chat_id_main, s.telegram_chat_id_debug)
     twitter = TwitterService(s.twitter_bearer_token, s.twitter_username, s.twitter_hashtag)
 
@@ -52,8 +54,8 @@ def main():
         return 1
     agenda = (",".join(f"{h:02d}:{m:02d}" for h, m in s.schedule_times)
               if s.schedule_times else f"a cada {s.interval_seconds}s")
-    log.info("Iniciando. Pares=%s DRY_RUN=%s modelo=%s raciocínio=%s agenda=%s",
-             pairs, s.dry_run, s.xai_model, s.xai_reasoning_effort, agenda)
+    log.info("Iniciando. Pares=%s DRY_RUN=%s modelo=%s raciocínio=%s agenda=%s X Search=%s",
+             pairs, s.dry_run, s.xai_model, s.xai_reasoning_effort, agenda, s.xai_x_search)
     if s.schedule_times:
         time.sleep(seconds_until_next(s.schedule_times))
 

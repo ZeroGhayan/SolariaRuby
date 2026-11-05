@@ -25,6 +25,10 @@ class Settings:
     xai_price_cached: float = 0.20
     xai_price_out: float = 2.50
     xai_base_url: str = "https://api.x.ai/v1"
+    xai_cache_seconds: int = 600
+    xai_x_search: bool = False
+    xai_x_handles: list = field(default_factory=lambda: ["raicher", "DollynhoCoin"])
+    xai_x_search_max_turns: int = 1
     telegram_bot_token: str = field(default="", repr=False)
     telegram_chat_id_main: str = ""
     telegram_chat_id_debug: str = ""
@@ -71,6 +75,10 @@ def load_settings(env_file=None) -> Settings:
         xai_price_cached=float(g("XAI_PRICE_CACHED_PER_M") or 0.20),
         xai_price_out=float(g("XAI_PRICE_OUTPUT_PER_M") or 2.50),
         xai_base_url=g("XAI_BASE_URL") or "https://api.x.ai/v1",
+        xai_cache_seconds=int(g("XAI_CACHE_SECONDS") or 600),
+        xai_x_search=_bool(g("XAI_X_SEARCH"), False),
+        xai_x_handles=[h.strip().lstrip("@") for h in (g("XAI_X_HANDLES") or "raicher,DollynhoCoin").split(",") if h.strip()],
+        xai_x_search_max_turns=int(g("XAI_X_SEARCH_MAX_TURNS") or 1),
         telegram_bot_token=g("TELEGRAM_BOT_TOKEN", ""),
         telegram_chat_id_main=g("TELEGRAM_CHAT_ID_MAIN", ""),
         telegram_chat_id_debug=g("TELEGRAM_CHAT_ID_DEBUG", ""),

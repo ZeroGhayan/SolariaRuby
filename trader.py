@@ -5,18 +5,27 @@ log = logging.getLogger(__name__)
 
 
 def size_order(decision, pair, price, base_free, quote_free, min_amount, min_cost, safety_margin):
-    """Converte o percentual do comando em quantidade e valida saldo e mínimos. Retorna (side, amount) ou (None, motivo)."""
-    acao, pct = decision["acao"], int(decision["pct"])
+    """Converte a decisão (S = valor específico, T = tudo) em quantidade do ativo base.
+
+    Nunca usa mais que (1 - safety_margin) do saldo livre e respeita os mínimos da OKX.
+    Retorna (side, amount) ou (None, motivo).
+    """
+    acao = decision["acao"]
     if acao == "manter":
         return None, "manter"
-    if price <= 0 or not 0 < pct <= 100:
-        return None, "preço ou percentual inválidos"
+    if price <= 0:
+        return None, "preço inválido"
     usable = 1 - safety_margin
+    valor = decision.get("valor")
     if acao == "comprar":
-        amount = quote_free * usable * pct / 100 / price
-        side = "buy"
+        spend = quote_free * usable
+        if decision.get("tipo") == "S":
+            spend = min(spend, float(valor))
+        amount, side = spend / price, "buy"
     else:
-        amount = base_free * usable * pct / 100
+        amount = base_free * usable
+        if decision.get("tipo") == "S":
+            amount = min(amount, float(valor))
         side = "sell"
     if amount <= 0:
         return None, "saldo insuficiente"
@@ -35,7 +44,7 @@ def run_pair(pair, exchange, analysis, telegram, tweets, safety_margin):
 
     exchange.cancel_open_orders(pair)
     decision = analysis.decide(pair, market, base_free, quote_free, tweets)
-    log.info("Decisão IA %s: %s (%s %d%%)", pair, decision["cmd"], decision["acao"], decision["pct"])
+    log.info("Decisão IA %s: %s -> %s (%s)", pair, decision["cmd"], decision["acao"], decision["motivo"])
 
     min_amount, min_cost = exchange.limits(pair)
     side, amount = size_order(decision, pair, market["last"], base_free, quote_free,
